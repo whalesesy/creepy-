@@ -1,0 +1,304 @@
+🛰️ Ultimate Guide to Creepy – Geolocation OSINT from Zero to Ninja
+
+Author: your‑name • License: CC BY‑SA 4.0 • Last updated: 11 July 2025
+
+Table of Contents
+
+What is OSINT?
+
+Why Geolocation Matters
+
+Meet Creepy
+
+System‑Friendly Installation
+
+First‑Run Quick‑Start
+
+Full Walk‑Through (GUI)
+
+Headless / Automation Workflow
+
+Use‑Cases & Case‑Studies
+
+Troubleshooting Matrix
+
+Extend Creepy – Writing Plugins
+
+Ethics & Legal Checklist
+
+Appendix A – OSINT Crash‑Course
+
+Appendix B – Cheat‑Sheet
+
+1  What is OSINT?
+
+Open‑Source Intelligence (OSINT) is the art of collecting publicly available information, analysing it, and producing actionable intelligence. Sources include:
+
+Social media posts
+
+Press releases, blogs, forums
+
+Domain records, public APIs, satellite imagery
+
+Goal: transform scattered public data into coherent stories or risk insights.
+
+2  Why Geolocation Matters
+
+Scenario
+
+Insight
+
+Impact
+
+Missing person
+
+last geotag of Instagram photo
+
+narrows search radius
+
+Incident response
+
+tweets from protest hotspot
+
+real‑time situational awareness
+
+Red‑team recon
+
+employee check‑ins near HQ
+
+physical‑security weak points
+
+Journalism
+
+verify refugee journey
+
+evidence for reports
+
+Geotagged metadata—often forgotten by users—can reveal where and when people were.
+
+3  Meet Creepy
+
+Creepy is an open‑source Python 2 application (GPL v2) that aggregates geotagged content from multiple platforms and plots it on an interactive map.
+
+Repo   : https://github.com/ilektrojohn/creepy
+Language: Python 2.7 + PyQt4 + QtWebKit + Leaflet
+Plugins : Twitter ▸ Flickr ▸ Instagram ▸ Foursquare ▸ GitHub Gists
+Exports : CSV ▸ KML ▸ GeoJSON ▸ HTML snapshot
+
+Why still use it in 2025? Despite age, Creepy remains handy for quick, offline geolocation mapping—especially when combined with modern pivots.
+
+4  System‑Friendly Installation
+
+4.1  Prerequisites
+
+sudo apt update
+sudo apt install python2 git curl geoclue-2.0   # Debian/Kali/Ubuntu
+
+4.2  Clone & Build Isolated Environment
+
+# 1  Clone repository
+cd ~
+git clone https://github.com/ilektrojohn/creepy.git
+cd creepy
+
+# 2  Bootstrap pip 2 & legacy virtualenv
+curl -sS https://bootstrap.pypa.io/pip/2.7/get-pip.py | sudo python2
+pip2 install --user virtualenv==16.7.9   # last Py‑2 friendly
+
+# 3  Create & activate venv
+~/.local/bin/virtualenv -p /usr/bin/python2 venv
+source venv/bin/activate
+
+# 4  Install Python deps (note sub‑folder!)
+pip install -r creepy/requirements.txt
+
+Tip: keep the whole toolset in ~/Tools/ for hygiene.
+
+5  First‑Run Quick‑Start
+
+# inside (venv)
+python creepy/creepy.py
+
+Add Target → pick service + username.
+
+Start Harvest → status bar shows API hits.
+
+Explore Map → pins = posts; click for metadata + thumbnail.
+
+Timeline → sortable table of all coords.
+
+Export → File ▸ Export ▸ CSV | KML | GeoJSON.
+
+
+
+6  Full Walk‑Through (GUI)
+
+6.1  Adding Multiple Targets
+
+Repeat Add Target for each user before hitting Start.
+
+Colour legend groups different accounts.
+
+6.2  Date‑Range & Keyword Filters
+
+Use Settings ▸ Filters to include only posts between 2024‑01‑01 → 2025‑07‑01.
+
+Combine with keyword list: vacation,airport,coffee for thematic views.
+
+6.3  Map Layers & Offline Tiles
+
+OSM default, Satellite hybrid, or custom tile server.
+
+Cache tiles: ~/.cache/creepy/tiles/ → operate fully offline later.
+
+6.4  Pivot‑Out Buttons
+
+Right‑click pin →
+
+Open Post (browser)
+
+Reverse Geocode (Google Maps)
+
+Street View to eyeball physical surroundings.
+
+7  Headless / Automation Workflow
+
+Ideal for cron jobs, CI pipelines, or mass‑collection.
+
+source ~/creepy/venv/bin/activate
+python creepy/creepy.py \
+  --nogui \
+  --service twitter \
+  --target nasa \
+  --export csv --output /tmp/nasa_geo.csv
+
+Combined with watch, cron, or a TryHackMe attackbox script, you get continuous geolocation feeds.
+
+8  Use‑Cases & Case‑Studies
+
+#
+
+Scenario
+
+Walk‑Through
+
+1
+
+Missing Teen
+
+Import Instagram handle, export KML, share with SAR teams via Google Earth.
+
+2
+
+Red‑Team Recon
+
+Map facility staff Twitter check‑ins; schedule on‑site test during holiday lull.
+
+3
+
+Journalistic Verification
+
+Cross‑reference refugee TikTok clips with Creepy Flickr trace to confirm route chronology.
+
+4
+
+Fraud Investigation
+
+Insurance claimant’s Flickr EXIF shows surf trip during alleged injury period.
+
+9  Troubleshooting Matrix
+
+Symptom
+
+Root Cause
+
+Fix
+
+SyntaxError in virtualenv
+
+New virtualenv incompatible with Py 2
+
+pip2 install virtualenv==16.7.9
+
+Blank map tiles
+
+offline / blocked OSM
+
+Settings ▸ Map ▸ Hybrid; or preload tiles.
+
+“No geodata found”
+
+private profile
+
+verify manually; switch platform; request legal access.
+
+Twitter API 2023+ breakage
+
+endpoint requires auth
+
+add bearer token in plugins/twitter_source.py.
+
+10  Extend Creepy – Writing Plugins
+
+# mysource_plugin.py
+from creepy.core.plugins import BaseSourcePlugin
+class MySource(BaseSourcePlugin):
+    SOURCE_NAME = "MySocial"
+    def _run(self):
+        for lat, lon, ts, link in self._my_api():
+            self._create_location(lat, lon, ts, link)
+
+Copy to creepy/sources/, import in __init__.py.
+
+Restart Creepy → new service appears in dropdown.
+
+11  Ethics & Legal Checklist
+
+✅ Consent / Authority checked
+
+✅ Minimisation (collect only necessary)
+
+✅ Secure Storage (encrypt exports)
+
+✅ Transparency in reporting methods
+
+❌ No stalking or violation of local privacy laws
+
+Appendix A – OSINT Crash‑Course
+
+Cycle
+
+Direction → define intel question.
+
+Collection → gather public data.
+
+Processing → clean, normalise.
+
+Analysis → derive meaning.
+
+Dissemination → deliver report.
+
+Key Tools
+
+Recon‑ng, SpiderFoot, Maltego → network/web intel.
+
+Creepy → geolocation.
+
+ExifTool → metadata extraction.
+
+Wayback Machine → historical snapshots.
+
+Appendix B – Cheat‑Sheet
+
+# activate env
+a=~/creepy; source $a/venv/bin/activate
+
+# single‑user flickr download
+time python $a/creepy/creepy.py \
+  --nogui --service flickr --target johndoe \
+  --export kml --output /tmp/johndoe.kml
+
+# view in Google Earth
+google-earth-pro /tmp/johndoe.kml
+
+Enjoy geohacking, stay ethical, and share improvements via pull request!
